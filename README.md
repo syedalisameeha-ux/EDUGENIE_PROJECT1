@@ -162,3 +162,7 @@ git push -u origin main
 ## API endpoints
 `POST /qa`, `POST /explain`, `POST /quiz`, `POST /summarize`, `POST /learn/recommendations` and `POST /api/task`
 (body: `{"task": "...", "text": "..."}`), plus `GET /health`.
+## 🚀 Live Demo
+🔗 [Edugenie](https://edugenie-yev6.onrender.com/)
+
+> Note: Hosted on Render's free tier, so the first load may take 30-60 seconds.
