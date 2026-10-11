@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="EduGenie helps you learn with AI-powered explanations, answers, quizzes, summaries, and learning paths.">
+  <title>EduGenie — Your AI Learning Assistant</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="EduGenie home"><span class="brand-mark">E</span> EduGenie</a>
+    <span class="top-note">Your personal AI study companion</span>
+  </header>
+  <main class="page">
+    <section class="hero">
+      <div class="eyebrow">LEARN SMARTER, EVERY DAY</div>
+      <h1>Big questions.<br><span>Simple explanations.</span></h1>
+      <p>Ask a doubt, understand a concept, revise a passage, or build your next learning plan.</p>
+    </section>
+
+    <section class="workspace" aria-labelledby="workspace-title">
+      <div class="workspace-head">
+        <div>
+          <h2 id="workspace-title">What would you like to do?</h2>
+          <p>Choose a learning tool and enter your topic or text below.</p>
+        </div>
+      </div>
+      <div class="task-grid" role="group" aria-label="Choose a task">
+        <button class="task-card selected" data-task="qa" type="button"><span class="task-icon">❔</span><span><b>Ask a question</b><small>Get a clear answer</small></span></button>
+        <button class="task-card" data-task="explain" type="button"><span class="task-icon">💡</span><span><b>Explain a topic</b><small>Learn in simple words</small></span></button>
+        <button class="task-card" data-task="quiz" type="button"><span class="task-icon">✓</span><span><b>Generate a quiz</b><small>Test your understanding</small></span></button>
+        <button class="task-card" data-task="summarize" type="button"><span class="task-icon">≡</span><span><b>Summarize text</b><small>Revise key points</small></span></button>
+        <button class="task-card" data-task="learn" type="button"><span class="task-icon">🧭</span><span><b>Learning path</b><small>Plan step by step</small></span></button>
+      </div>
+      <form id="task-form">
+        <label for="user-text" id="input-label">Your question</label>
+        <textarea id="user-text" name="text" rows="5" maxlength="20000" required placeholder="For example: Why is the sky blue?"></textarea>
+        <div class="form-foot"><span id="hint">Be specific for the most useful answer.</span><span id="char-count">0 / 20,000</span></div>
+        <button id="submit-btn" class="primary-btn" type="submit"><span id="button-label">Ask EduGenie</span><span aria-hidden="true"> →</span></button>
+      </form>
+      <div id="status" class="status" role="status" aria-live="polite" hidden></div>
+      <section id="result-panel" class="result-panel" hidden aria-live="polite">
+        <div class="result-heading"><h2>Your result</h2><button id="copy-btn" class="secondary-btn" type="button">Copy result</button></div>
+        <div id="result-content"></div>
+      </section>
+    </section>
+    <p class="disclaimer">EduGenie uses AI-generated content. Check important facts with your textbook or trusted sources.</p>
+  </main>
+  <footer>EduGenie · Built for curious learners</footer>
+  <script>
+  (() => {
+    const taskCards = [...document.querySelectorAll('.task-card')];
+    const form = document.getElementById('task-form');
+    const textArea = document.getElementById('user-text');
+    const inputLabel = document.getElementById('input-label');
+    const hint = document.getElementById('hint');
+    const count = document.getElementById('char-count');
+    const submitBtn = document.getElementById('submit-btn');
+    const buttonLabel = document.getElementById('button-label');
+    const status = document.getElementById('status');
+    const panel = document.getElementById('result-panel');
+    const resultContent = document.getElementById('result-content');
+    let selectedTask = 'qa';
+    let lastResult = '';
+
+    const settings = {
+      qa: { label: 'Your question', placeholder: 'For example: Why is the sky blue?', hint: 'Ask one clear question.', button: 'Ask EduGenie' },
+      explain: { label: 'Topic to explain', placeholder: 'For example: Explain photosynthesis to a beginner.', hint: 'Add your class or level if helpful.', button: 'Explain topic' },
+      quiz: { label: 'Topic or passage for quiz', placeholder: 'Paste a lesson or enter a topic. EduGenie creates 3 MCQs.', hint: 'Enter at least 10 characters.', button: 'Generate quiz' },
+      summarize: { label: 'Passage to summarize', placeholder: 'Paste the paragraph or notes you want to revise.', hint: 'Enter at least 20 characters.', button: 'Summarize text' },
+      learn: { label: 'Topic for your learning path', placeholder: 'For example: Learn SQL from beginner to advanced.', hint: 'Tell us the topic and your current level.', button: 'Build learning path' }
+    };
+
+    taskCards.forEach(card => card.addEventListener('click', () => {
+      selectedTask = card.dataset.task;
+      taskCards.forEach(item => item.classList.toggle('selected', item === card));
+      const setting = settings[selectedTask];
+      inputLabel.textContent = setting.label;
+      textArea.placeholder = setting.placeholder;
+      hint.textContent = setting.hint;
+      buttonLabel.textContent = setting.button;
+      status.hidden = true;
+      panel.hidden = true;
+    }));
+    textArea.addEventListener('input', () => count.textContent = `${textArea.value.length.toLocaleString()} / 20,000`);
+
+    function addText(parent, tag, value, className) {
+      const el = document.createElement(tag);
+      if (className) el.className = className;
+      el.textContent = value;
+      parent.appendChild(el);
+      return el;
+    }
+    function renderResult(task, result) {
+      resultContent.replaceChildren();
+      if (task === 'quiz' && Array.isArray(result)) {
+        result.forEach((q, i) => {
+          const card = document.createElement('article');
+          card.className = 'quiz-question';
+          addText(card, 'h3', `${i + 1}. ${q.question}`);
+          const options = document.createElement('div');
+          options.className = 'options';
+          q.options.forEach(option => {
+            const button = addText(options, 'button', option, 'option-btn');
+            button.type = 'button';
+            button.addEventListener('click', () => {
+              [...options.children].forEach(b => { b.disabled = true; b.classList.remove('correct', 'incorrect'); });
+              if (option === q.answer) button.classList.add('correct');
+              else {
+                button.classList.add('incorrect');
+                [...options.children].find(b => b.textContent === q.answer)?.classList.add('correct');
+              }
+              const feedback = document.createElement('p');
+              feedback.className = 'feedback';
+              feedback.textContent = `${option === q.answer ? 'Correct!' : 'Not quite.'} ${q.explanation || `Correct answer: ${q.answer}`}`;
+              card.appendChild(feedback);
+            });
+            options.appendChild(button);
+          });
+          card.appendChild(options);
+          resultContent.appendChild(card);
+        });
+        lastResult = result.map((q, i) => `${i + 1}. ${q.question}\n${q.options.map((o, j) => `${String.fromCharCode(65+j)}. ${o}`).join('\n')}\nAnswer: ${q.answer}\nExplanation: ${q.explanation || ''}`).join('\n\n');
+      } else {
+        const text = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+        text.split('\n').forEach(line => addText(resultContent, 'p', line || ' ', 'result-line'));
+        lastResult = text;
+      }
+    }
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      const text = textArea.value.trim();
+      if (!text) { textArea.focus(); return; }
+      submitBtn.disabled = true;
+      buttonLabel.textContent = 'Thinking…';
+      status.hidden = false;
+      status.textContent = 'EduGenie is preparing your result. This can take a few seconds.';
+      status.className = 'status loading';
+      panel.hidden = true;
+      try {
+        const response = await fetch('/api/task', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task: selectedTask, text })
+        });
+        const raw = await response.text();
+        let data;
+        try { data = JSON.parse(raw); }
+        catch { throw new Error(`Server error (${response.status}). The EduGenie server is not responding correctly - make sure it is running and open the app from its main URL.`); }
+        if (!response.ok) throw new Error(data.detail || 'Request failed. Please try again.');
+        renderResult(selectedTask, data.result);
+        panel.hidden = false;
+        status.hidden = true;
+      } catch (error) {
+        status.className = 'status error';
+        status.textContent = error.message || 'Could not connect to EduGenie. Check that the server is running.';
+      } finally {
+        submitBtn.disabled = false;
+        buttonLabel.textContent = settings[selectedTask].button;
+      }
+    });
+    document.getElementById('copy-btn').addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(lastResult);
+        document.getElementById('copy-btn').textContent = 'Copied!';
+        setTimeout(() => document.getElementById('copy-btn').textContent = 'Copy result', 1500);
+      } catch {
+        status.hidden = false;
+        status.className = 'status error';
+        status.textContent = 'Clipboard access was blocked. Select and copy the result manually.';
+      }
+    });
+  })();
+  </script>
+</body>
+</html>
