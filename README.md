@@ -1,5 +1,22 @@
 # EduGenie — Google Gemini Powered Learning Assistant
+## Team Details
+- **Team Lead:** Sameeha K S
+  - **Email:** syedalisameeha@gmail.com
+  - **NM ID:** 13D02D7D5C3FCFFAF774F125C731B4E4
+  - **Role:** Full-Stack & Model Integration
 
+- **Team Member 1:** Janani Manickam
+  - **Email:** jananimanickam.2007@gmail.com
+  - **NM ID:** E6B4E01BA6E6056940C433CDB1CAF71C
+
+- **Team Member 2:** Lakshika R
+  - **Email:** rlakshika68@gmail.com
+  - **NM ID:** 87B573908143D36A960480C805D469FE
+
+- **Team Member 3:** Shalini V
+  - **Email:** shalinivenkadasalam1604@gmail.com
+  - **NM ID:** BACB223FB5D6C6DA9404697AACEAA00E
+  - 
 EduGenie is a responsive learning assistant based on the supplied project documentation. It provides:
 - Academic Q&A
 - Beginner-friendly concept explanations
